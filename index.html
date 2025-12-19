@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>headache.guide — Identify What's Causing Your Headache</title>
+  <meta name="description" content="A free tool to help identify potential causes of your headache and get actionable relief suggestions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    a:hover {
+      filter: brightness(1.1);
+    }
+    ::selection {
+      background: rgba(79, 172, 254, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ============================================================================
+    // INITIAL STATE
+    // ============================================================================
+
+    const initialAnswers = {
+      thunderclap: null,
+      worstEver: null,
+      feverStiffNeck: null,
+      afterInjury: null,
+      visionConfusionWeakness: null,
+      wakesFromSleep: null,
+      newAfter50: null,
+      worseOverDays: null,
+      onset: null,
+      location: null,
+      feeling: null,
+      severity: null,
+      lastMeal: null,
+      waterToday: null,
+      caffeineVsUsual: null,
+      sleepQuality: null,
+      screenTime: null,
+      neckTension: null,
+      neckStretchHelps: null,
+      sinusCongestion: null,
+      nauseaOrLightSensitivity: null,
+      recentStress: null,
+      frequentPainkillers: null,
+    };
+
+    // ============================================================================
+    // DIAGNOSIS LOGIC
+    // ============================================================================
+
+    function analyzeHeadache(answers) {
+      const results = [];
+
+      // Tension-type headache
+      let tensionScore = 0;
+      if (answers.location === 'back-neck' || answers.location === 'forehead' || answers.location === 'all-over') tensionScore += 25;
+      if (answers.feeling === 'pressure' || answers.feeling === 'dull') tensionScore += 25;
+      if (answers.onset === 'gradual') tensionScore += 15;
+      if (answers.screenTime === 'heavy' || answers.screenTime === 'moderate') tensionScore += 15;
+      if (answers.neckTension === 'significant' || answers.neckTension === 'some') tensionScore += 15;
+      if (answers.neckStretchHelps === true) tensionScore += 20;
+      if (answers.recentStress === 'moderate' || answers.recentStress === 'severe') tensionScore += 15;
+      if (answers.nauseaOrLightSensitivity === false) tensionScore += 10;
+
+      if (tensionScore >= 40) {
+        results.push({
+          id: 'tension',
+          name: 'Tension-Type Headache',
+          confidence: Math.min(tensionScore, 95),
+          description: 'Caused by muscle tension in the head, neck, and shoulders, often from stress, posture, or prolonged screen use.',
+          immediateRemedies: [
+            'Take a 20-minute break from screens',
+            'Apply heat to the back of your neck (heating pad or hot towel)',
+            'Suboccipital release: Lie down and rest the base of your skull on two tennis balls or your fists for 2-3 minutes',
+            'Chin tucks: Pull chin straight back (making a double chin), hold 5 seconds, repeat 10 times',
+            'Gentle neck rolls and shoulder shrugs',
+            'If needed: OTC pain reliever (ibuprofen, acetaminophen, or aspirin)',
+            'Dim the lights and reduce noise if possible',
+          ],
+          preventionTips: [
+            'Take screen breaks every 45-60 minutes (look away, stretch neck)',
+            'Check your workstation ergonomics — monitor at eye level, arms at 90°',
+            'Regular exercise, especially for neck and shoulders',
+            'Stress management techniques (even 5 minutes of deep breathing)',
+            'Consistent sleep schedule',
+          ],
+          whenToWorry: 'If this headache pattern is new, unusually severe, or doesn\'t respond to usual remedies.',
+        });
+      }
+
+      // Migraine
+      let migraineScore = 0;
+      if (answers.location === 'one-side' || answers.location === 'behind-eyes') migraineScore += 25;
+      if (answers.feeling === 'throbbing') migraineScore += 30;
+      if (answers.nauseaOrLightSensitivity === true) migraineScore += 30;
+      if (answers.severity && answers.severity >= 6) migraineScore += 15;
+      if (answers.onset === 'gradual') migraineScore += 10;
+
+      if (migraineScore >= 50) {
+        results.push({
+          id: 'migraine',
+          name: 'Possible Migraine',
+          confidence: Math.min(migraineScore, 90),
+          description: 'A neurological condition causing moderate to severe headaches, often with throbbing pain, nausea, and sensitivity to light or sound.',
+          immediateRemedies: [
+            'Go to a dark, quiet room immediately',
+            'Apply a cold compress to your forehead or temples',
+            'If you have migraine-specific medication (triptans), take as prescribed',
+            'OTC options: ibuprofen, aspirin, or acetaminophen (most effective if taken early)',
+            'Caffeine can help (small amount) if you don\'t usually have much',
+            'Stay hydrated with small sips of water',
+            'Try to sleep if possible',
+          ],
+          preventionTips: [
+            'Keep a headache diary to identify your triggers',
+            'Common triggers: certain foods (aged cheese, alcohol, processed meats), irregular sleep, hormonal changes, weather changes, strong smells',
+            'Regular sleep schedule (same time daily, even weekends)',
+            'Don\'t skip meals',
+            'If frequent (4+ per month), talk to a doctor about preventive medication',
+          ],
+          whenToWorry: 'If this is your first migraine-like headache, if it\'s different from your usual migraines, or if it\'s accompanied by fever, stiff neck, confusion, or weakness.',
+        });
+      }
+
+      // Cervicogenic (neck-related)
+      let cervicogenicScore = 0;
+      if (answers.location === 'back-neck') cervicogenicScore += 30;
+      if (answers.neckStretchHelps === true) cervicogenicScore += 30;
+      if (answers.neckTension === 'significant') cervicogenicScore += 25;
+      if (answers.feeling === 'dull' || answers.feeling === 'pressure') cervicogenicScore += 15;
+      if (answers.screenTime === 'heavy') cervicogenicScore += 15;
+
+      if (cervicogenicScore >= 55 && answers.location === 'back-neck') {
+        results.push({
+          id: 'cervicogenic',
+          name: 'Cervicogenic Headache (Neck-Related)',
+          confidence: Math.min(cervicogenicScore, 90),
+          description: 'Pain originating from the neck structures (muscles, joints, nerves) that refers up into the head.',
+          immediateRemedies: [
+            'Stop what you\'re doing and change position',
+            'Heat on the back of neck and upper shoulders for 15-20 minutes',
+            'Gentle neck stretches: ear to shoulder, chin to chest, slow rotations',
+            'Suboccipital release with tennis balls or massage',
+            'Avoid looking down at phone/laptop',
+            'OTC anti-inflammatory (ibuprofen) if needed',
+          ],
+          preventionTips: [
+            'Workstation ergonomics are critical — monitor at eye level',
+            'Don\'t cradle phone between ear and shoulder',
+            'Sleep position: avoid sleeping on stomach, use supportive pillow',
+            'Regular neck strengthening exercises',
+            'Consider a standing desk or position changes throughout day',
+            'If persistent, see a physical therapist',
+          ],
+          whenToWorry: 'If you have numbness/tingling in arms, significant weakness, or the pain doesn\'t improve with position changes.',
+        });
+      }
+
+      // Dehydration
+      let dehydrationScore = 0;
+      if (answers.waterToday === 'little' || answers.waterToday === 'none') dehydrationScore += 40;
+      if (answers.waterToday === 'some') dehydrationScore += 15;
+      if (answers.location === 'all-over' || answers.location === 'forehead') dehydrationScore += 15;
+      if (answers.feeling === 'dull' || answers.feeling === 'throbbing') dehydrationScore += 10;
+
+      if (dehydrationScore >= 40) {
+        results.push({
+          id: 'dehydration',
+          name: 'Dehydration Headache',
+          confidence: Math.min(dehydrationScore, 85),
+          description: 'Caused by insufficient fluid intake, leading to brain tissue temporarily contracting from fluid loss.',
+          immediateRemedies: [
+            'Drink 16-32 oz of water over the next hour (don\'t chug all at once)',
+            'Add electrolytes if available (sports drink, coconut water, or pinch of salt in water)',
+            'Avoid caffeine and alcohol (they\'re diuretics)',
+            'Eat water-rich foods (cucumber, watermelon, oranges)',
+            'Rest in a cool place',
+          ],
+          preventionTips: [
+            'Aim for 8+ glasses of water daily (more if exercising or hot weather)',
+            'Keep a water bottle visible at your desk',
+            'Check your urine color — pale yellow is ideal',
+            'Set reminders if you forget to drink',
+            'Increase intake during exercise, hot weather, illness',
+          ],
+          whenToWorry: 'If you\'re severely dehydrated (very dark urine, dizziness, rapid heartbeat, confusion) or can\'t keep fluids down.',
+        });
+      }
+
+      // Caffeine-related
+      let caffeineScore = 0;
+      if (answers.caffeineVsUsual === 'less' || answers.caffeineVsUsual === 'none-usually-have') caffeineScore += 50;
+      if (answers.feeling === 'throbbing' || answers.feeling === 'dull') caffeineScore += 15;
+      if (answers.location === 'forehead' || answers.location === 'all-over' || answers.location === 'behind-eyes') caffeineScore += 10;
+      if (answers.onset === 'gradual') caffeineScore += 10;
+
+      if (caffeineScore >= 50) {
+        results.push({
+          id: 'caffeine',
+          name: 'Caffeine Withdrawal Headache',
+          confidence: Math.min(caffeineScore, 85),
+          description: 'Occurs when regular caffeine consumers have less caffeine than usual. Caffeine narrows blood vessels, and withdrawal causes them to expand.',
+          immediateRemedies: [
+            'Have a small amount of caffeine (half your usual amount)',
+            'If trying to quit caffeine, OTC pain reliever can help bridge the gap',
+            'Stay hydrated',
+            'Rest if possible',
+            'This typically peaks at 24-48 hours and resolves within a week if quitting',
+          ],
+          preventionTips: [
+            'If reducing caffeine, taper gradually (reduce by 25% every few days)',
+            'Keep caffeine intake consistent day-to-day',
+            'Don\'t skip your morning coffee on weekends if you have it on weekdays',
+            'Be aware of hidden caffeine sources (chocolate, some medications, tea)',
+          ],
+          whenToWorry: 'Caffeine withdrawal headaches are uncomfortable but not dangerous. If headache persists beyond a week of consistent caffeine intake, something else may be going on.',
+        });
+      }
+
+      // Hunger/Blood sugar
+      let hungerScore = 0;
+      if (answers.lastMeal === 'over-6h') hungerScore += 45;
+      if (answers.lastMeal === '4-6h') hungerScore += 25;
+      if (answers.location === 'forehead' || answers.location === 'temples' || answers.location === 'all-over') hungerScore += 15;
+      if (answers.feeling === 'dull') hungerScore += 15;
+
+      if (hungerScore >= 45) {
+        results.push({
+          id: 'hunger',
+          name: 'Hunger / Low Blood Sugar Headache',
+          confidence: Math.min(hungerScore, 85),
+          description: 'When you haven\'t eaten for a while, blood sugar drops can trigger headaches. The brain needs glucose to function.',
+          immediateRemedies: [
+            'Eat something with both protein and complex carbs (not just sugar)',
+            'Good options: nuts and fruit, cheese and crackers, peanut butter toast',
+            'Avoid pure sugar (candy) — it spikes then crashes',
+            'Drink water alongside your snack',
+            'Headache should improve within 30 minutes of eating',
+          ],
+          preventionTips: [
+            'Eat regular meals — don\'t skip breakfast or lunch',
+            'Keep healthy snacks accessible',
+            'Include protein with meals to stabilize blood sugar',
+            'If you\'re fasting intentionally, stay hydrated and break fast if headache becomes severe',
+          ],
+          whenToWorry: 'If you\'re diabetic and experiencing headaches with blood sugar issues, monitor carefully. If headaches persist despite eating, look for other causes.',
+        });
+      }
+
+      // Eye strain
+      let eyeStrainScore = 0;
+      if (answers.location === 'behind-eyes' || answers.location === 'forehead') eyeStrainScore += 25;
+      if (answers.screenTime === 'heavy') eyeStrainScore += 35;
+      if (answers.screenTime === 'moderate') eyeStrainScore += 20;
+      if (answers.feeling === 'pressure' || answers.feeling === 'dull') eyeStrainScore += 15;
+      if (answers.onset === 'gradual') eyeStrainScore += 10;
+
+      if (eyeStrainScore >= 50) {
+        results.push({
+          id: 'eyestrain',
+          name: 'Eye Strain Headache (Digital Eye Strain)',
+          confidence: Math.min(eyeStrainScore, 85),
+          description: 'Caused by prolonged focus on screens or reading, leading to eye muscle fatigue.',
+          immediateRemedies: [
+            'Follow the 20-20-20 rule: Look at something 20 feet away for 20 seconds every 20 minutes',
+            'Close your eyes and rest them for 5 minutes',
+            'Reduce screen brightness and increase text size',
+            'Use artificial tears if eyes feel dry',
+            'Step outside and look at distant objects',
+            'Apply a cool compress over closed eyes',
+          ],
+          preventionTips: [
+            'Position screen at arm\'s length, slightly below eye level',
+            'Reduce glare (adjust lighting, use matte screen protector)',
+            'Blink deliberately — we blink less when staring at screens',
+            'Use blue light filtering (built into most devices now)',
+            'Get eyes checked — you may need glasses or updated prescription',
+            'Take regular breaks (every 30-45 minutes)',
+          ],
+          whenToWorry: 'If you have persistent vision changes, eye pain, or headaches don\'t improve with breaks, see an eye doctor.',
+        });
+      }
+
+      // Sinus headache
+      let sinusScore = 0;
+      if (answers.location === 'sinus-area' || answers.location === 'forehead') sinusScore += 25;
+      if (answers.sinusCongestion === true) sinusScore += 40;
+      if (answers.feeling === 'pressure') sinusScore += 20;
+
+      if (sinusScore >= 50) {
+        results.push({
+          id: 'sinus',
+          name: 'Sinus Headache',
+          confidence: Math.min(sinusScore, 85),
+          description: 'Pain from inflammation or congestion in the sinus cavities, often associated with colds, allergies, or sinus infections.',
+          immediateRemedies: [
+            'Steam inhalation: Hot shower or bowl of hot water with towel over head',
+            'Saline nasal spray or rinse (neti pot)',
+            'Warm compress over sinuses (forehead, cheeks, nose bridge)',
+            'Stay hydrated to thin mucus',
+            'OTC decongestant (pseudoephedrine) or antihistamine if allergies',
+            'OTC pain reliever for the headache itself',
+            'Sleep with head slightly elevated',
+          ],
+          preventionTips: [
+            'Manage allergies proactively',
+            'Use a humidifier in dry environments',
+            'Stay hydrated',
+            'Avoid known irritants (smoke, strong perfumes)',
+            'Treat colds early to prevent sinus complications',
+          ],
+          whenToWorry: 'If you have fever over 101°F, symptoms lasting more than 10 days, severe pain, or symptoms that improve then suddenly worsen — you may have a bacterial sinus infection needing antibiotics.',
+        });
+      }
+
+      // Medication overuse headache
+      let medicationScore = 0;
+      if (answers.frequentPainkillers === true) medicationScore += 60;
+      if (answers.location === 'all-over') medicationScore += 15;
+      if (answers.feeling === 'dull') medicationScore += 10;
+      if (answers.onset === 'woke-with') medicationScore += 15;
+
+      if (medicationScore >= 60) {
+        results.push({
+          id: 'medication-overuse',
+          name: 'Possible Medication Overuse Headache',
+          confidence: Math.min(medicationScore, 80),
+          description: 'Paradoxically, taking pain relievers too frequently (more than 10-15 days per month) can cause rebound headaches.',
+          immediateRemedies: [
+            'This one is tricky — the remedy is to reduce the medication causing it',
+            'Don\'t stop abruptly without medical guidance if using opioids or barbiturates',
+            'For OTC medications, gradual reduction is usually safe',
+            'Expect headaches to temporarily worsen before they improve',
+            'Stay very hydrated during withdrawal period',
+          ],
+          preventionTips: [
+            'Limit acute headache medication to no more than 2-3 days per week',
+            'Talk to a doctor about preventive medication if you need pain relief frequently',
+            'Keep a headache diary to track medication use',
+            'Treat headaches early so you need less medication',
+          ],
+          whenToWorry: 'If you\'re using pain medication daily, please consult a healthcare provider. They can help you safely reduce usage and find better long-term solutions.',
+        });
+      }
+
+      // Sleep-related
+      let sleepScore = 0;
+      if (answers.sleepQuality === 'poor' || answers.sleepQuality === 'very-poor') sleepScore += 35;
+      if (answers.onset === 'woke-with') sleepScore += 25;
+      if (answers.location === 'all-over' || answers.location === 'forehead') sleepScore += 10;
+      if (answers.feeling === 'dull' || answers.feeling === 'pressure') sleepScore += 10;
+
+      if (sleepScore >= 45) {
+        results.push({
+          id: 'sleep',
+          name: 'Sleep-Related Headache',
+          confidence: Math.min(sleepScore, 80),
+          description: 'Poor sleep quality or quantity disrupts normal brain function and can trigger headaches.',
+          immediateRemedies: [
+            'If possible, take a short nap (20-30 minutes)',
+            'Get some sunlight exposure to help regulate your circadian rhythm',
+            'Stay hydrated',
+            'Light exercise can help (walk outside)',
+            'OTC pain reliever if needed',
+            'Avoid extra caffeine — it\'ll make tonight\'s sleep worse',
+          ],
+          preventionTips: [
+            'Consistent sleep schedule (same bedtime and wake time daily)',
+            'Aim for 7-9 hours per night',
+            'Limit screens 1 hour before bed',
+            'Cool, dark, quiet bedroom',
+            'Avoid caffeine after early afternoon',
+            'If you have sleep apnea or snore heavily, get evaluated',
+          ],
+          whenToWorry: 'If you regularly wake with headaches, especially with snoring, gasping, or daytime sleepiness, you may have sleep apnea. Consult a doctor.',
+        });
+      }
+
+      // Stress/Emotional
+      let stressScore = 0;
+      if (answers.recentStress === 'severe') stressScore += 40;
+      if (answers.recentStress === 'moderate') stressScore += 25;
+      if (answers.neckTension === 'significant' || answers.neckTension === 'some') stressScore += 15;
+      if (answers.feeling === 'pressure' || answers.feeling === 'dull') stressScore += 10;
+      if (answers.onset === 'gradual') stressScore += 10;
+
+      if (stressScore >= 40 && results.length < 3) {
+        results.push({
+          id: 'stress',
+          name: 'Stress-Related Headache',
+          confidence: Math.min(stressScore, 80),
+          description: 'Emotional stress causes physical tension and physiological changes that can trigger headaches, even when you\'re not actively worrying.',
+          immediateRemedies: [
+            'Step away from the stressful situation if possible',
+            'Deep breathing: 4 counts in, hold 4, out 6 (repeat 5 times)',
+            'Progressive muscle relaxation: tense then release each muscle group',
+            'Go for a walk, preferably outside',
+            'Talk to someone about what\'s bothering you',
+            'Heat on neck and shoulders',
+          ],
+          preventionTips: [
+            'Regular exercise is one of the best stress reducers',
+            'Build in daily decompression time (even 10 minutes)',
+            'Address sources of stress when possible',
+            'Consider therapy or counseling for ongoing stress',
+            'Limit news/social media if it\'s a trigger',
+            'Practice saying no to overcommitment',
+          ],
+          whenToWorry: 'If stress is overwhelming or you\'re experiencing anxiety or depression symptoms, please reach out to a mental health professional.',
+        });
+      }
+
+      // Sort by confidence
+      results.sort((a, b) => b.confidence - a.confidence);
+
+      // Return top 3 most likely
+      return results.slice(0, 3);
+    }
+
+    // ============================================================================
+    // STYLES
+    // ============================================================================
+
+    const styles = {
+      container: {
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%)',
+        color: '#e8e8e8',
+        fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+        padding: '0',
+        margin: '0',
+      },
+      inner: {
+        maxWidth: '720px',
+        margin: '0 auto',
+        padding: '40px 24px',
+      },
+      header: {
+        textAlign: 'center',
+        marginBottom: '48px',
+      },
+      logo: {
+        fontSize: '48px',
+        marginBottom: '8px',
+      },
+      title: {
+        fontSize: '32px',
+        fontWeight: '300',
+        letterSpacing: '-0.5px',
+        margin: '0 0 8px 0',
+        color: '#ffffff',
+      },
+      subtitle: {
+        fontSize: '16px',
+        color: '#8b9dc3',
+        margin: '0',
+        fontWeight: '400',
+      },
+      card: {
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '24px',
+      },
+      disclaimerCard: {
+        background: 'rgba(255, 200, 87, 0.05)',
+        border: '1px solid rgba(255, 200, 87, 0.2)',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '24px',
+      },
+      redFlagCard: {
+        background: 'rgba(255, 87, 87, 0.08)',
+        border: '1px solid rgba(255, 87, 87, 0.3)',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '24px',
+      },
+      sectionTitle: {
+        fontSize: '20px',
+        fontWeight: '600',
+        marginBottom: '20px',
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      },
+      text: {
+        fontSize: '15px',
+        lineHeight: '1.7',
+        color: '#b8c5d6',
+        marginBottom: '16px',
+      },
+      questionGroup: {
+        marginBottom: '28px',
+      },
+      questionLabel: {
+        fontSize: '16px',
+        fontWeight: '500',
+        marginBottom: '12px',
+        color: '#ffffff',
+      },
+      optionsGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: '10px',
+      },
+      optionButton: {
+        padding: '14px 16px',
+        borderRadius: '10px',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        background: 'rgba(255, 255, 255, 0.04)',
+        color: '#c8d4e3',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+      },
+      optionButtonSelected: {
+        padding: '14px 16px',
+        borderRadius: '10px',
+        border: '1px solid rgba(100, 200, 255, 0.5)',
+        background: 'rgba(100, 200, 255, 0.15)',
+        color: '#ffffff',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+      },
+      redFlagButton: {
+        padding: '14px 16px',
+        borderRadius: '10px',
+        border: '1px solid rgba(255, 87, 87, 0.3)',
+        background: 'rgba(255, 87, 87, 0.08)',
+        color: '#ffb3b3',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+        width: '100%',
+        marginBottom: '10px',
+      },
+      redFlagButtonSelected: {
+        padding: '14px 16px',
+        borderRadius: '10px',
+        border: '1px solid rgba(255, 87, 87, 0.8)',
+        background: 'rgba(255, 87, 87, 0.25)',
+        color: '#ffffff',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left',
+        width: '100%',
+        marginBottom: '10px',
+      },
+      primaryButton: {
+        padding: '16px 32px',
+        borderRadius: '12px',
+        border: 'none',
+        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        color: '#0a1628',
+        fontSize: '16px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        width: '100%',
+        marginTop: '16px',
+      },
+      secondaryButton: {
+        padding: '14px 28px',
+        borderRadius: '12px',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        background: 'transparent',
+        color: '#c8d4e3',
+        fontSize: '15px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        marginTop: '12px',
+        width: '100%',
+      },
+      emergencyButton: {
+        padding: '16px 32px',
+        borderRadius: '12px',
+        border: 'none',
+        background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
+        color: '#ffffff',
+        fontSize: '16px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        width: '100%',
+        marginTop: '16px',
+      },
+      resultCard: {
+        background: 'rgba(100, 200, 255, 0.05)',
+        border: '1px solid rgba(100, 200, 255, 0.2)',
+        borderRadius: '16px',
+        padding: '28px',
+        marginBottom: '20px',
+      },
+      confidenceBadge: {
+        display: 'inline-block',
+        padding: '4px 12px',
+        borderRadius: '20px',
+        background: 'rgba(100, 200, 255, 0.2)',
+        color: '#7dd3fc',
+        fontSize: '13px',
+        fontWeight: '500',
+        marginLeft: '12px',
+      },
+      resultTitle: {
+        fontSize: '20px',
+        fontWeight: '600',
+        color: '#ffffff',
+        marginBottom: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      },
+      resultDescription: {
+        fontSize: '14px',
+        color: '#9cb3c9',
+        marginBottom: '20px',
+        lineHeight: '1.6',
+      },
+      remedySection: {
+        marginBottom: '20px',
+      },
+      remedyTitle: {
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#7dd3fc',
+        marginBottom: '10px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+      },
+      remedyList: {
+        margin: '0',
+        paddingLeft: '20px',
+        color: '#c8d4e3',
+        fontSize: '14px',
+        lineHeight: '1.8',
+      },
+      warningBox: {
+        background: 'rgba(255, 200, 87, 0.1)',
+        border: '1px solid rgba(255, 200, 87, 0.3)',
+        borderRadius: '10px',
+        padding: '16px',
+        marginTop: '16px',
+      },
+      warningText: {
+        fontSize: '13px',
+        color: '#ffd97d',
+        margin: '0',
+        lineHeight: '1.6',
+      },
+      footer: {
+        textAlign: 'center',
+        marginTop: '48px',
+        paddingTop: '24px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+      },
+      footerText: {
+        fontSize: '13px',
+        color: '#6b7c93',
+        lineHeight: '1.7',
+      },
+      progressBar: {
+        height: '4px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '2px',
+        marginBottom: '32px',
+        overflow: 'hidden',
+      },
+      progressFill: {
+        height: '100%',
+        background: 'linear-gradient(90deg, #4facfe, #00f2fe)',
+        borderRadius: '2px',
+        transition: 'width 0.3s ease',
+      },
+      sliderContainer: {
+        padding: '10px 0',
+      },
+      slider: {
+        width: '100%',
+        height: '8px',
+        borderRadius: '4px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        outline: 'none',
+        cursor: 'pointer',
+      },
+      sliderLabels: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: '8px',
+        fontSize: '12px',
+        color: '#6b7c93',
+      },
+      severityDisplay: {
+        textAlign: 'center',
+        fontSize: '32px',
+        fontWeight: '600',
+        color: '#ffffff',
+        marginBottom: '8px',
+      },
+    };
+
+    // ============================================================================
+    // COMPONENTS
+    // ============================================================================
+
+    // Disclaimer Screen
+    function DisclaimerScreen({ onAccept }) {
+      return (
+        <>
+          <div style={styles.disclaimerCard}>
+            <h2 style={styles.sectionTitle}>
+              <span>⚠️</span> Important Notice
+            </h2>
+            <p style={styles.text}>
+              This tool provides <strong>general educational information</strong> to help you think through potential causes of your headache. It is <strong>not a substitute for professional medical advice, diagnosis, or treatment</strong>.
+            </p>
+            <p style={styles.text}>
+              <strong>This tool does not:</strong>
+            </p>
+            <ul style={{ ...styles.text, paddingLeft: '20px' }}>
+              <li>Provide medical diagnoses</li>
+              <li>Replace consultation with a healthcare provider</li>
+              <li>Account for your complete medical history</li>
+              <li>Identify all possible causes of your symptoms</li>
+            </ul>
+            <p style={styles.text}>
+              <strong>Always seek professional medical care if:</strong>
+            </p>
+            <ul style={{ ...styles.text, paddingLeft: '20px' }}>
+              <li>Your headache is severe or the worst you've ever experienced</li>
+              <li>You have any concerning symptoms (we'll ask about these next)</li>
+              <li>Your headaches are frequent, worsening, or changing pattern</li>
+              <li>OTC medications don't help or you need them frequently</li>
+              <li>You're unsure or worried about your symptoms</li>
+            </ul>
+            <p style={{ ...styles.text, fontStyle: 'italic', marginBottom: '0' }}>
+              By continuing, you acknowledge that this tool provides information only and that you take full responsibility for your health decisions.
+            </p>
+          </div>
+          <button style={styles.primaryButton} onClick={onAccept}>
+            I Understand — Continue
+          </button>
+        </>
+      );
+    }
+
+    // Red Flags Screen
+    function RedFlagsScreen({ answers, setAnswers, onContinue }) {
+      const redFlags = [
+        { key: 'thunderclap', label: 'Headache came on suddenly and severely (reached max intensity within seconds/minutes)' },
+        { key: 'worstEver', label: 'This is the worst headache of my life' },
+        { key: 'feverStiffNeck', label: 'I have fever AND a stiff neck' },
+        { key: 'afterInjury', label: 'This headache started after a head injury' },
+        { key: 'visionConfusionWeakness', label: 'I have vision changes, confusion, slurred speech, or weakness on one side' },
+        { key: 'wakesFromSleep', label: 'This headache woke me from sleep' },
+        { key: 'newAfter50', label: "I'm over 50 and this is a new type of headache for me" },
+        { key: 'worseOverDays', label: 'This headache has been getting progressively worse over days/weeks' },
+      ];
+
+      const hasAnyRedFlag = redFlags.some(rf => answers[rf.key] === true);
+
+      return (
+        <>
+          <div style={styles.redFlagCard}>
+            <h2 style={styles.sectionTitle}>
+              <span>🚨</span> Safety Check First
+            </h2>
+            <p style={styles.text}>
+              Some headaches require immediate medical attention. Please check any that apply:
+            </p>
+            {redFlags.map(rf => (
+              <button
+                key={rf.key}
+                style={answers[rf.key] ? styles.redFlagButtonSelected : styles.redFlagButton}
+                onClick={() => setAnswers({ ...answers, [rf.key]: !answers[rf.key] })}
+              >
+                {answers[rf.key] ? '✓ ' : '○ '}{rf.label}
+              </button>
+            ))}
+          </div>
+
+          {hasAnyRedFlag ? (
+            <div style={styles.card}>
+              <h2 style={{ ...styles.sectionTitle, color: '#ff8a8a' }}>
+                <span>⚠️</span> Please Seek Medical Care
+              </h2>
+              <p style={styles.text}>
+                Based on what you've indicated, your symptoms may require prompt medical evaluation. These "red flag" symptoms can sometimes indicate serious conditions that need professional assessment.
+              </p>
+              <p style={styles.text}>
+                <strong>We recommend:</strong>
+              </p>
+              <ul style={{ ...styles.text, paddingLeft: '20px' }}>
+                <li>If symptoms are severe or you feel this is an emergency: <strong>Call 911 or go to the ER</strong></li>
+                <li>If symptoms are concerning but not emergent: <strong>Contact your doctor today or visit urgent care</strong></li>
+              </ul>
+              <a
+                href="tel:911"
+                style={{ ...styles.emergencyButton, display: 'block', textAlign: 'center', textDecoration: 'none' }}
+              >
+                📞 Call 911
+              </a>
+              <button style={styles.secondaryButton} onClick={onContinue}>
+                My symptoms aren't that severe — continue anyway
+              </button>
+            </div>
+          ) : (
+            <button style={styles.primaryButton} onClick={onContinue}>
+              None of these apply — Continue
+            </button>
+          )}
+        </>
+      );
+    }
+
+    // Questions Screen
+    function QuestionsScreen({ answers, setAnswers, onComplete }) {
+      const [step, setStep] = useState(0);
+
+      const steps = [
+        {
+          title: 'Describe Your Headache',
+          questions: [
+            {
+              key: 'onset',
+              label: 'How did it start?',
+              options: [
+                { value: 'sudden', label: 'Suddenly' },
+                { value: 'gradual', label: 'Built up gradually' },
+                { value: 'woke-with', label: 'Woke up with it' },
+              ],
+            },
+            {
+              key: 'location',
+              label: 'Where is the pain?',
+              options: [
+                { value: 'forehead', label: 'Forehead' },
+                { value: 'temples', label: 'Temples (sides)' },
+                { value: 'behind-eyes', label: 'Behind eyes' },
+                { value: 'one-side', label: 'One side only' },
+                { value: 'back-neck', label: 'Back of head / neck' },
+                { value: 'sinus-area', label: 'Forehead / cheeks / nose' },
+                { value: 'all-over', label: 'All over' },
+              ],
+            },
+            {
+              key: 'feeling',
+              label: 'What does it feel like?',
+              options: [
+                { value: 'pressure', label: 'Pressure / squeezing' },
+                { value: 'throbbing', label: 'Throbbing / pulsing' },
+                { value: 'stabbing', label: 'Stabbing / sharp' },
+                { value: 'dull', label: 'Dull ache' },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Pain Level',
+          questions: [
+            {
+              key: 'severity',
+              label: 'Rate your pain (1-10)',
+              type: 'slider',
+            },
+          ],
+        },
+        {
+          title: 'Physical Factors',
+          questions: [
+            {
+              key: 'lastMeal',
+              label: 'When did you last eat?',
+              options: [
+                { value: 'under-2h', label: 'Under 2 hours ago' },
+                { value: '2-4h', label: '2-4 hours ago' },
+                { value: '4-6h', label: '4-6 hours ago' },
+                { value: 'over-6h', label: 'Over 6 hours ago' },
+              ],
+            },
+            {
+              key: 'waterToday',
+              label: 'Water intake today?',
+              options: [
+                { value: 'plenty', label: 'Plenty' },
+                { value: 'some', label: 'Some' },
+                { value: 'little', label: 'Very little' },
+                { value: 'none', label: 'Almost none' },
+              ],
+            },
+            {
+              key: 'caffeineVsUsual',
+              label: 'Caffeine today vs. usual?',
+              options: [
+                { value: 'more', label: 'More than usual' },
+                { value: 'same', label: 'About the same' },
+                { value: 'less', label: 'Less than usual' },
+                { value: 'none-usually-have', label: 'None (usually have some)' },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Sleep & Screens',
+          questions: [
+            {
+              key: 'sleepQuality',
+              label: 'How did you sleep last night?',
+              options: [
+                { value: 'great', label: 'Great' },
+                { value: 'ok', label: 'Okay' },
+                { value: 'poor', label: 'Poorly' },
+                { value: 'very-poor', label: 'Very poorly / barely slept' },
+              ],
+            },
+            {
+              key: 'screenTime',
+              label: 'Screen time today?',
+              options: [
+                { value: 'none', label: 'Almost none' },
+                { value: 'little', label: 'A little (< 2 hrs)' },
+                { value: 'moderate', label: 'Moderate (2-5 hrs)' },
+                { value: 'heavy', label: 'Heavy (5+ hrs)' },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Neck & Tension',
+          questions: [
+            {
+              key: 'neckTension',
+              label: 'Any neck/shoulder tension right now?',
+              options: [
+                { value: 'none', label: 'None' },
+                { value: 'some', label: 'Some' },
+                { value: 'significant', label: 'Significant' },
+              ],
+            },
+            {
+              key: 'neckStretchHelps',
+              label: 'Does stretching your neck help the headache?',
+              options: [
+                { value: true, label: 'Yes, temporarily' },
+                { value: false, label: "No / haven't tried" },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Other Symptoms',
+          questions: [
+            {
+              key: 'sinusCongestion',
+              label: 'Any sinus congestion or cold symptoms?',
+              options: [
+                { value: true, label: 'Yes' },
+                { value: false, label: 'No' },
+              ],
+            },
+            {
+              key: 'nauseaOrLightSensitivity',
+              label: 'Any nausea or sensitivity to light/sound?',
+              options: [
+                { value: true, label: 'Yes' },
+                { value: false, label: 'No' },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Stress & Medication',
+          questions: [
+            {
+              key: 'recentStress',
+              label: 'Recent emotional stress?',
+              options: [
+                { value: 'none', label: 'None / minimal' },
+                { value: 'mild', label: 'Mild' },
+                { value: 'moderate', label: 'Moderate' },
+                { value: 'severe', label: 'Significant / severe' },
+              ],
+            },
+            {
+              key: 'frequentPainkillers',
+              label: 'Do you take headache medication more than 10 days per month?',
+              options: [
+                { value: true, label: 'Yes' },
+                { value: false, label: 'No' },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const currentStep = steps[step];
+      const progress = ((step + 1) / steps.length) * 100;
+
+      const canContinue = currentStep.questions.every(q => {
+        if (q.type === 'slider') {
+          return answers[q.key] !== null;
+        }
+        return answers[q.key] !== null;
+      });
+
+      return (
+        <>
+          <div style={styles.progressBar}>
+            <div style={{ ...styles.progressFill, width: `${progress}%` }} />
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.sectionTitle}>{currentStep.title}</h2>
+
+            {currentStep.questions.map((q) => (
+              <div key={q.key} style={styles.questionGroup}>
+                <div style={styles.questionLabel}>{q.label}</div>
+
+                {q.type === 'slider' ? (
+                  <div style={styles.sliderContainer}>
+                    <div style={styles.severityDisplay}>
+                      {answers.severity ?? '—'}
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={answers.severity ?? 5}
+                      onChange={(e) => setAnswers({ ...answers, severity: parseInt(e.target.value) })}
+                      style={styles.slider}
+                    />
+                    <div style={styles.sliderLabels}>
+                      <span>1 - Mild</span>
+                      <span>5 - Moderate</span>
+                      <span>10 - Severe</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={styles.optionsGrid}>
+                    {q.options.map((opt) => (
+                      <button
+                        key={String(opt.value)}
+                        style={answers[q.key] === opt.value ? styles.optionButtonSelected : styles.optionButton}
+                        onClick={() => setAnswers({ ...answers, [q.key]: opt.value })}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {step > 0 && (
+              <button style={{ ...styles.secondaryButton, marginTop: '0', flex: '1' }} onClick={() => setStep(step - 1)}>
+                ← Back
+              </button>
+            )}
+            <button
+              style={{ ...styles.primaryButton, marginTop: '0', flex: '2', opacity: canContinue ? 1 : 0.5 }}
+              onClick={() => step < steps.length - 1 ? setStep(step + 1) : onComplete()}
+              disabled={!canContinue}
+            >
+              {step < steps.length - 1 ? 'Continue →' : 'See Results'}
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    // Results Screen
+    function ResultsScreen({ answers, onStartOver }) {
+      const results = analyzeHeadache(answers);
+
+      return (
+        <>
+          <div style={styles.card}>
+            <h2 style={styles.sectionTitle}>
+              <span>🔍</span> Analysis Complete
+            </h2>
+            <p style={styles.text}>
+              Based on your answers, here are the most likely contributing factors to your headache, along with suggestions that may help. Remember: this is educational information, not a medical diagnosis.
+            </p>
+          </div>
+
+          {results.length === 0 ? (
+            <div style={styles.resultCard}>
+              <h3 style={styles.resultTitle}>Unable to Determine</h3>
+              <p style={styles.resultDescription}>
+                We couldn't identify a clear pattern from your answers. This could mean your headache has an unusual presentation or multiple overlapping causes. Consider consulting a healthcare provider if the headache persists or worsens.
+              </p>
+            </div>
+          ) : (
+            results.map((result, index) => (
+              <div key={result.id} style={styles.resultCard}>
+                <h3 style={styles.resultTitle}>
+                  {index === 0 ? '🎯 ' : ''}{result.name}
+                  <span style={styles.confidenceBadge}>{result.confidence}% match</span>
+                </h3>
+                <p style={styles.resultDescription}>{result.description}</p>
+
+                <div style={styles.remedySection}>
+                  <div style={styles.remedyTitle}>💊 Try Now</div>
+                  <ul style={styles.remedyList}>
+                    {result.immediateRemedies.map((remedy, i) => (
+                      <li key={i}>{remedy}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div style={styles.remedySection}>
+                  <div style={styles.remedyTitle}>🛡️ Prevent Future Episodes</div>
+                  <ul style={styles.remedyList}>
+                    {result.preventionTips.map((tip, i) => (
+                      <li key={i}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div style={styles.warningBox}>
+                  <p style={styles.warningText}>
+                    <strong>When to see a doctor:</strong> {result.whenToWorry}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+
+          <div style={styles.disclaimerCard}>
+            <h3 style={{ ...styles.sectionTitle, fontSize: '16px' }}>
+              <span>📋</span> General Guidance
+            </h3>
+            <p style={{ ...styles.text, fontSize: '14px' }}>
+              <strong>See a healthcare provider if:</strong>
+            </p>
+            <ul style={{ ...styles.text, fontSize: '14px', paddingLeft: '20px', marginBottom: '0' }}>
+              <li>Your headache doesn't improve with the suggestions above</li>
+              <li>You're getting headaches more frequently than usual</li>
+              <li>You need OTC pain medication more than 2-3 times per week</li>
+              <li>Your headache pattern has changed</li>
+              <li>You're concerned about your symptoms for any reason</li>
+            </ul>
+          </div>
+
+          <button style={styles.primaryButton} onClick={onStartOver}>
+            Start Over
+          </button>
+        </>
+      );
+    }
+
+    // ============================================================================
+    // MAIN APP
+    // ============================================================================
+
+    function HeadacheGuide() {
+      const [screen, setScreen] = useState('disclaimer');
+      const [answers, setAnswers] = useState(initialAnswers);
+
+      const handleStartOver = () => {
+        setAnswers(initialAnswers);
+        setScreen('disclaimer');
+      };
+
+      return (
+        <div style={styles.container}>
+          <div style={styles.inner}>
+            <header style={styles.header}>
+              <div style={styles.logo}>🧠</div>
+              <h1 style={styles.title}>headache.guide</h1>
+              <p style={styles.subtitle}>Identify what's causing your headache</p>
+            </header>
+
+            {screen === 'disclaimer' && (
+              <DisclaimerScreen onAccept={() => setScreen('redFlags')} />
+            )}
+
+            {screen === 'redFlags' && (
+              <RedFlagsScreen
+                answers={answers}
+                setAnswers={setAnswers}
+                onContinue={() => setScreen('questions')}
+              />
+            )}
+
+            {screen === 'questions' && (
+              <QuestionsScreen
+                answers={answers}
+                setAnswers={setAnswers}
+                onComplete={() => setScreen('results')}
+              />
+            )}
+
+            {screen === 'results' && (
+              <ResultsScreen
+                answers={answers}
+                onStartOver={handleStartOver}
+              />
+            )}
+
+            <footer style={styles.footer}>
+              <p style={styles.footerText}>
+                This tool provides general health information only and is not intended as medical advice.
+                Always consult a qualified healthcare provider for diagnosis and treatment.
+                In case of emergency, call your local emergency number immediately.
+              </p>
+              <p style={{ ...styles.footerText, marginTop: '12px' }}>
+                © {new Date().getFullYear()} headache.guide — For educational purposes only
+              </p>
+            </footer>
+          </div>
+        </div>
+      );
+    }
+
+    // Render
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<HeadacheGuide />);
+  </script>
+</body>
+</html>
