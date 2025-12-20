@@ -2,83 +2,104 @@
 // Data Module - Aggregated Exports
 // ============================================================================
 
-import type { Question, DiagnosticRule, Remedy, HeadacheCategory } from '../types';
-
+import type {
+	DiagnosticRule,
+	HeadacheCategory,
+	Question,
+	Remedy,
+} from "../types";
+import {
+	locationQuestions,
+	onsetQuestions,
+	qualityQuestions,
+} from "./questions-core";
+import { lifestyleQuestions } from "./questions-lifestyle";
 // Questions
-import { redFlagQuestions } from './questions-redflag';
-import { onsetQuestions, locationQuestions, qualityQuestions } from './questions-core';
-import { lifestyleQuestions } from './questions-lifestyle';
-import { triggerQuestions } from './questions-triggers';
-
-// Rules
-import { tensionRules, cervicogenicRules } from './rules-tension';
-import { dehydrationRules, caffeineRules, hungerRules, sleepRules, eyeStrainRules } from './rules-lifestyle';
-import { migraineRules, sinusRules, otherRules, redFlagRules } from './rules-other';
-
+import { redFlagQuestions } from "./questions-redflag";
+import { triggerQuestions } from "./questions-triggers";
+import {
+	alcoholRemedies,
+	caffeineExcessRemedies,
+	caffeineRemedies,
+	dehydrationRemedies,
+	eyeStrainRemedies,
+	hungerRemedies,
+	sleepRemedies,
+} from "./remedies-lifestyle";
+import {
+	medicationOveruseRemedies,
+	migraineRemedies,
+	sinusRemedies,
+	unknownRemedies,
+	weatherRemedies,
+} from "./remedies-other";
 // Remedies
-import { tensionRemedies, cervicogenicRemedies, stressRemedies } from './remedies-tension';
 import {
-  dehydrationRemedies,
-  caffeineRemedies,
-  caffeineExcessRemedies,
-  hungerRemedies,
-  eyeStrainRemedies,
-  sleepRemedies,
-  alcoholRemedies,
-} from './remedies-lifestyle';
+	cervicogenicRemedies,
+	stressRemedies,
+	tensionRemedies,
+} from "./remedies-tension";
 import {
-  migraineRemedies,
-  sinusRemedies,
-  weatherRemedies,
-  medicationOveruseRemedies,
-  unknownRemedies,
-} from './remedies-other';
+	caffeineRules,
+	dehydrationRules,
+	eyeStrainRules,
+	hungerRules,
+	sleepRules,
+} from "./rules-lifestyle";
+import {
+	migraineRules,
+	otherRules,
+	redFlagRules,
+	sinusRules,
+} from "./rules-other";
+// Rules
+import { cervicogenicRules, tensionRules } from "./rules-tension";
 
+export { getAnswer, hasAnyValue, hasValue } from "./answer-utils";
 // Disclaimers
-export { legalDisclaimer, redFlagWarning } from './disclaimers';
-export { getAnswer, hasValue, hasAnyValue } from './answer-utils';
+export { legalDisclaimer, redFlagWarning } from "./disclaimers";
 
 // Aggregated questions in order
 export const questions: Question[] = [
-  ...redFlagQuestions,
-  ...onsetQuestions,
-  ...locationQuestions,
-  ...qualityQuestions,
-  ...lifestyleQuestions,
-  ...triggerQuestions,
+	...redFlagQuestions,
+	...onsetQuestions,
+	...locationQuestions,
+	...qualityQuestions,
+	...lifestyleQuestions,
+	...triggerQuestions,
 ];
 
 // Aggregated diagnostic rules
 export const diagnosticRules: DiagnosticRule[] = [
-  ...redFlagRules,
-  ...tensionRules,
-  ...cervicogenicRules,
-  ...dehydrationRules,
-  ...caffeineRules,
-  ...hungerRules,
-  ...sleepRules,
-  ...eyeStrainRules,
-  ...migraineRules,
-  ...sinusRules,
-  ...otherRules,
+	...redFlagRules,
+	...tensionRules,
+	...cervicogenicRules,
+	...dehydrationRules,
+	...caffeineRules,
+	...hungerRules,
+	...sleepRules,
+	...eyeStrainRules,
+	...migraineRules,
+	...sinusRules,
+	...otherRules,
 ];
 
 // Remedies mapped by category
 export const remedies: Record<HeadacheCategory, Remedy[]> = {
-  tension: tensionRemedies,
-  cervicogenic: cervicogenicRemedies,
-  stress: stressRemedies,
-  dehydration: dehydrationRemedies,
-  caffeine_withdrawal: caffeineRemedies,
-  caffeine_excess: caffeineExcessRemedies,
-  hunger: hungerRemedies,
-  eye_strain: eyeStrainRemedies,
-  sleep_deprivation: sleepRemedies,
-  alcohol: alcoholRemedies,
-  migraine: migraineRemedies,
-  sinus: sinusRemedies,
-  weather: weatherRemedies,
-  medication_overuse: medicationOveruseRemedies,
-  unknown: unknownRemedies,
-  red_flag: [],
+	tension: tensionRemedies,
+	cervicogenic: cervicogenicRemedies,
+	stress: stressRemedies,
+	dehydration: dehydrationRemedies,
+	caffeine_withdrawal: caffeineRemedies,
+	caffeine_excess: caffeineExcessRemedies,
+	hunger: hungerRemedies,
+	eye_strain: eyeStrainRemedies,
+	sleep_deprivation: sleepRemedies,
+	alcohol: alcoholRemedies,
+	migraine: migraineRemedies,
+	sinus: sinusRemedies,
+	weather: weatherRemedies,
+	medication_overuse: medicationOveruseRemedies,
+	unknown: unknownRemedies,
+	red_flag: [],
 };
