@@ -1,0 +1,164 @@
+/* ============================================================================
+   Results Screen
+   ============================================================================ */
+
+.results-screen {
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-2xl);
+}
+
+.results-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.results-header {
+  text-align: center;
+}
+
+.results-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto var(--space-md);
+  color: var(--accent-success);
+}
+
+.results-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.diagnosis-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+}
+
+.diagnosis-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.diagnosis-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.diagnosis-confidence {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: var(--space-lg);
+}
+
+.diagnosis-description {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.reasoning-section {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.reasoning-section h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.reasoning-section p {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.secondary-causes {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.secondary-causes h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.secondary-cause {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.secondary-name {
+  color: var(--text-secondary);
+}
+
+.secondary-confidence {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.remedies-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.remedies-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.remedy-category {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+}
+
+.results-disclaimer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.results-disclaimer h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  color: var(--accent-warning);
+}
+
+.results-disclaimer p {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.results-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-lg);
+}
